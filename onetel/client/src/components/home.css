@@ -1,0 +1,65 @@
+.custome-card{
+    display: block;
+    position: relative;
+    
+   /* From https://css.glass */
+   
+ background: linear-gradient(45deg, rgba(0, 0, 0, 0.1) 25%, transparent 25%, transparent 75%, rgba(0, 0, 0, 0.1) 75%, rgba(0, 0, 0, 0.1)), linear-gradient(45deg, rgba(0, 0, 0, 0.1) 25%, transparent 25%, transparent 75%, rgba(0, 0, 0, 0.1) 75%, rgba(0, 0, 0, 0.1));
+    
+ 
+ border-radius: 16px;
+ box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+ backdrop-filter: blur(6.7px);
+ -webkit-backdrop-filter: blur(6.7px);
+ border: 2px solid rgba(74, 113, 236, 0.41);
+}
+.header-image{
+    
+ 
+ box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+ backdrop-filter: blur(6.7px);
+ -webkit-backdrop-filter: blur(6.7px);
+  
+}
+.Searchbar{
+  border-radius: 50px;
+  border: 1px solid rgba(250, 250, 250, 0.596);
+  
+}
+.search-button {
+  margin-left: 10px;
+  padding: 10px 20px;
+  background-color: #f0ad4e;
+  color: #fff;
+  border: none;
+  border-radius: 50px;
+  font-size: 16px;
+  cursor: pointer;
+
+}
+.search-button:hover {
+  background-color: #e69533;
+}
+.btn-buy{
+  border: none;
+  border-radius: 30px;
+  font-size: 15px;
+  height: 45px;
+  outline: none;
+  width: 40%;
+  color: black;
+  background: rgba(240, 31, 31, 0.938);
+  cursor: pointer;
+  transition: .3s ;
+}
+.btn-buy:hover{
+  box-shadow: 1px 5px 7px 1px rgba(0, 0, 0, 0.2);
+  background: rgba(240, 31, 31, 0.938);
+}
+.carts{
+  margin-top: -1130px;
+  position: absolute;
+  margin-left: 600px;
+} 
+
+
