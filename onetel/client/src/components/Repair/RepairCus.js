@@ -3,6 +3,7 @@ import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import axios from 'axios';
 import { message } from 'antd';
+import validator from 'validator'; // Import the validator library
 import Card from 'react-bootstrap/Card';
 
 export default class RepairCus extends Component {
@@ -37,12 +38,22 @@ export default class RepairCus extends Component {
       message.error('Please fill in all fields');
       return;
     }
-    // Validate email format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    // Validate email format with validator
+
+    if (!validator.isEmail(this.state.email)) {
+      toast.error('Invalid email format');
+      return;
+    }
+
+
+    // Validate email format without validator(ReDos Attack)
+
+    /*const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       message.error('Invalid email address');
       return;
-    }
+    }*/
 
     // Validate contact number
     const contactNumberRegex = /^\d{10}$/;

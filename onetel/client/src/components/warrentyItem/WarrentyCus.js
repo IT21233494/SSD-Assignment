@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useState } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import validator from 'validator'; // Import the validator library
 import './wform.css';
 
  
@@ -34,12 +35,21 @@ export default function AddWarranty() {
     return;
   }
 
-  // Validate email format
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  //Email Validate
+
+  // Validate email format with validator
+
+  if (!validator.isEmail(this.state.email)) {
+    toast.error('Invalid email format');
+    return;
+  }
+
+  // Validate email format without validator(ReDos Attack)
+  /*const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(cusEmail)) {
     toast.error('Invalid email address');
     return;
-  }
+  }*/
     
     const formData = new FormData();
 

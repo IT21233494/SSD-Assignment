@@ -2,6 +2,7 @@ import React from 'react';
 import axios from 'axios';
 import { useState } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
+import validator from 'validator'; // Import the validator library
 import 'react-toastify/dist/ReactToastify.css';
 import "./emp.css"
 export default function Addemp() {
@@ -27,11 +28,21 @@ export default function Addemp() {
       return;
     }
     // Validate email format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    // Validate email using validator
+
+    if (!validator.isEmail(this.state.email)) {
+      toast.error('Invalid email format');
+      return;
+    }
+
+    // Validate email format without validator(ReDos Attack)
+
+   /* const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       toast.error('Invalid email address');
       return;
-    }
+    }*/
 
     const formData = new FormData();
 
