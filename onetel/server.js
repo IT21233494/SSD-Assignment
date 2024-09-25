@@ -54,7 +54,7 @@ app.get("/", (req, res) => {
 })
 
 
-const DB_URL = ''
+const DB_URL = 'mongodb+srv://minduleerash12:roRfyMETfcch9kZU@onetel.4xefk.mongodb.net/'
 mongoose.set('strictQuery', false);
 mongoose.set('strictQuery', true);
 
