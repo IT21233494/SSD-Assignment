@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import {register} from './userFuntion';
+import validator from 'validator'; // Import the validator library
 
 import { Link } from "react-router-dom";
 import { ToastContainer, toast } from 'react-toastify';
@@ -35,11 +36,22 @@ class Register extends Component {
     }
 
      // Email validation
-     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+     // Validate email using validator
+
+    if (!validator.isEmail(this.state.email)) {
+      toast.error('Invalid email format');
+      return;
+    }
+
+
+    //Validate email without validator(ReDos Attack)
+
+  /*   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
      if (!emailRegex.test(this.state.email)) {
        toast.error('Invalid email format');
        return;
-     }
+     }  */
 
     const user ={
         first_name:this.state.first_name,
