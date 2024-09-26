@@ -39,16 +39,29 @@ const Home = () => {
       }
     });
   }
-
-  const setRandomHeaderImage = () => {
-    const headerImages = [
-        ran1,ran2,ran3
+//issue accordingly sonar qube
+  // const setRandomHeaderImage = () => {
+  //   const headerImages = [
+  //       ran1,ran2,ran3
         
-      // Add more image URLs for the header
-    ];
-    const randomIndex = Math.floor(Math.random() * headerImages.length);
-    setHeaderImageUrl(headerImages[randomIndex]);
-  };
+  //     // Add more image URLs for the header
+  //   ];
+  //   const randomIndex = Math.floor(Math.random() * headerImages.length);
+  //   setHeaderImageUrl(headerImages[randomIndex]);
+  // };
+
+  //this is fixed one
+  const setRandomHeaderImage = () => {
+    const headerImages = [ran1, ran2, ran3]; // Your image URLs
+
+    const crypto = window.crypto || window.msCrypto; // Use browser CSPRNG
+    const array = new Uint32Array(1); // Generate a secure random number
+    crypto.getRandomValues(array); // Get a cryptographically secure random number
+    
+    const randomIndex = array[0] % headerImages.length; // Ensure index is within array bounds
+    setHeaderImageUrl(headerImages[randomIndex]); // Set random image
+};
+
 
   // Searching part  
   const filterData = (searchKey) => {

@@ -5,7 +5,20 @@ const bcrypt = require('bcrypt');
 const cors = require('cors');
 const Admin = require('../models/postAdmin');
 
-router.use(cors());
+// this issue from sonar qube
+// router.use(cors());
+
+// fix the issue
+// Define trusted origins for CORS policy
+const corsOptions = {
+    origin: ['http://localhost:3000'],  // Replace this with the trusted domains
+    optionsSuccessStatus: 200 // For legacy browser support
+  };
+  
+  // Apply CORS middleware with restricted origins
+router.use(cors(corsOptions));  // UPDATED: Restrict CORS to trusted origins only
+  
+
 process.env.SECRET_KEY = 'admin';
 
 

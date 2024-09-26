@@ -2,7 +2,11 @@ const bodyParser = require('body-parser');
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+
+//fix accooprding to sonarqube
+const helmet = require('helmet');
 const app = express();
+
 app.set('trust proxy', 1);
 const rateLimit = require('express-rate-limit');
 
@@ -40,6 +44,10 @@ app.use(express.static('upload'));
 app.use(express.static('rentUpload'));
 app.use(cors());
 app.use(limiter);
+
+//fix accoriding to sonarqube
+app.use(helmet()); // Use Helmet for added security
+app.disable("x-powered-by"); // Disable X-Powered-By header
 
 
 

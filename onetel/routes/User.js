@@ -5,6 +5,8 @@ const bcrypt = require('bcrypt');
 const cors = require('cors');
 const User = require('../models/postUsers');
 
+//fix XSS issue
+const sanitizeHtml = require('sanitize-html');
 
 router.use(cors());
 process.env.SECRET_KEY = 'secret';
@@ -56,35 +58,71 @@ router.post('/register', (req, res) => {
 });
 
 // Login route
-router.post('/login', (req, res) => {
-    // Input validation
-    if (typeof req.body.email !== 'string'){
-        return res.status(400).json({ error: 'Invalid input type' });
-    }
+// router.post('/login', (req, res) => {
+//     // Input validation
+//     if (typeof req.body.email !== 'string'){
+//         return res.status(400).json({ error: 'Invalid input type' });
+//     }
 
-    User.findOne({ email: req.body.email })
-      .then(user => {
-        if (user) {
-          if (bcrypt.compareSync(req.body.password, user.password)) {
-            const payload = {
-              _id: user._id,
-              first_name: user.first_name,
-              last_name: user.last_name,
-              email: user.email
-            };
-            let token = jwt.sign(payload, process.env.SECRET_KEY, { expiresIn: 1440 });
-            res.send(token);
-          } else {
-            res.status(401).json({ error: 'Invalid password' });
-          }
+//     User.findOne({ email: req.body.email })
+//       .then(user => {
+//         if (user) {
+//           if (bcrypt.compareSync(req.body.password, user.password)) {
+//             const payload = {
+//               _id: user._id,
+//               first_name: user.first_name,
+//               last_name: user.last_name,
+//               email: user.email
+//             };
+//             let token = jwt.sign(payload, process.env.SECRET_KEY, { expiresIn: 1440 });
+//             res.send(token);
+//           } else {
+//             res.status(401).json({ error: 'Invalid password' });
+//           }
+//         } else {
+//           res.status(404).json({ error: 'User not found' });
+//         }
+//       })
+//       .catch(err => {
+//         res.status(500).json({ error: 'Server error' });
+//       });
+// });
+
+//Fix XSS 
+// Login route
+router.post('/login', (req, res) => {
+  // Input validation
+  if (typeof req.body.email !== 'string') {
+      return res.status(400).json({ error: 'Invalid input type' });
+  }
+
+  // Sanitize email input to prevent XSS
+  const sanitizedEmail = sanitizeHtml(req.body.email);
+
+  User.findOne({ email: sanitizedEmail })
+    .then(user => {
+      if (user) {
+        if (bcrypt.compareSync(req.body.password, user.password)) {
+          const payload = {
+            _id: user._id,
+            first_name: user.first_name,
+            last_name: user.last_name,
+            email: user.email
+          };
+          let token = jwt.sign(payload, process.env.SECRET_KEY, { expiresIn: 1440 });
+          res.send(token);
         } else {
-          res.status(404).json({ error: 'User not found' });
+          res.status(401).json({ error: 'Invalid password' });
         }
-      })
-      .catch(err => {
-        res.status(500).json({ error: 'Server error' });
-      });
+      } else {
+        res.status(404).json({ error: 'User not found' });
+      }
+    })
+    .catch(err => {
+      res.status(500).json({ error: 'Server error' });
+    });
 });
+
 
 // Profile route
 router.get('/profile', (req, res) => {

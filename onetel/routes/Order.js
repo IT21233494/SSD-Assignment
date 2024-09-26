@@ -1,9 +1,19 @@
 const express = require('express');
-
+// const csrf = require('csurf'); 
 const Postdelivery = require('../models/order')
  
 
 const router = express.Router();
+
+// // Initialize CSRF protection
+// const csrfProtection = csrf({ cookie: true });
+// router.use(csrfProtection);
+
+// // Middleware to get CSRF token
+// router.get('/csrf-token', (req, res) => {
+//     res.json({ csrfToken: req.csrfToken() });
+// });
+
 
 //save posts
 

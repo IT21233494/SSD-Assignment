@@ -89,9 +89,18 @@ const Storage = multer.diskStorage({
     },
 });
 
+//this fixed accordingly sonar qube
+// const upload = multer({
+//     storage: Storage
+// }).single('CusImg')
+
+//fixed
 const upload = multer({
-    storage: Storage
-}).single('CusImg')
+    storage: Storage,
+    limits: {
+        fileSize: 8000000 // 8MB limit
+    }
+}).single('file');
 
 //get a specific post
 router.get('/Emp/:id', async (req, res) => {
