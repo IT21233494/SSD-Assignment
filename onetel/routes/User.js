@@ -2,12 +2,15 @@ const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
-const  cors = require('cors');
+const cors = require('cors');
 const User = require('../models/postUsers');
-router.use(cors());
 
+
+router.use(cors());
 process.env.SECRET_KEY = 'secret';
 
+
+// Register route
 router.post('/register', (req, res) => {
     const today = new Date();
   
@@ -18,16 +21,22 @@ router.post('/register', (req, res) => {
       password: req.body.password,
       created: today
     };
-  
+
     // Check if any required field is empty
     if (!userData.first_name || !userData.last_name || !userData.email || !userData.password) {
       return res.status(400).json({ error: 'Please fill in all required fields' });
     }
-  
-    User.findOne({ email: req.body.email })
+    
+    // NoSQL injection prevention
+    if ( 
+      typeof userData.email !== 'string') {
+      return res.status(400).json({ error: 'Invalid input type' });
+  }
+
+    User.findOne({ email: userData.email })
       .then(user => {
         if (!user) {
-          bcrypt.hash(req.body.password, 10, (err, hash) => {
+          bcrypt.hash(userData.password, 10, (err, hash) => {
             userData.password = hash;
             User.create(userData)
               .then(user => {
@@ -44,13 +53,15 @@ router.post('/register', (req, res) => {
       .catch(err => {
         res.status(500).json({ error: 'Internal server error' });
       });
-  });
-  
+});
 
-
-
-
+// Login route
 router.post('/login', (req, res) => {
+    // Input validation
+    if (typeof req.body.email !== 'string'){
+        return res.status(400).json({ error: 'Invalid input type' });
+    }
+
     User.findOne({ email: req.body.email })
       .then(user => {
         if (user) {
@@ -73,65 +84,62 @@ router.post('/login', (req, res) => {
       .catch(err => {
         res.status(500).json({ error: 'Server error' });
       });
-  });
-  
-
-router.get('/profile',(req,res)=>{
-    var decoded = jwt.verify(req.headers['authorization'],process.env.SECRET_KEY)
-
-    User.findOne({
-        _id:decoded._id
-    })
-      .then(user =>{
-        if(user){
-            res.json(user)
-        }else{
-            res.send("User Doesnot exist");
-        }
-      })
-      .catch(err=>{
-        res.send("ERRor"+err);
-      })
-
-
-})
-
-//get posts
-
-router.get('/getData',(req,res)=>{
-  User.find().exec((err,user)=>{
-      if(err){
-          return res.status(400).json({
-              error:err
-          });
-      }
-          return res.status(200).json({
-              success:true,
-              existingPosts:user
-          });
-      
-  });
 });
 
+// Profile route
+router.get('/profile', (req, res) => {
+    const token = req.headers['authorization'];
+    if (!token) {
+        return res.status(403).json({ error: 'No token provided' });
+    }
 
-//delete post
-router.delete('/user/delete/:id',(req,res)=>{
-    User.findByIdAndRemove(req.params.id).exec((err,user)=>{
-        if(err)
+    var decoded;
+    try {
+        decoded = jwt.verify(token, process.env.SECRET_KEY);
+    } catch (err) {
+        return res.status(500).json({ error: 'Failed to authenticate token' });
+    }
+
+    User.findOne({ _id: decoded._id })
+      .then(user => {
+        if (user) {
+            res.json(user);
+        } else {
+            res.send("User does not exist");
+        }
+      })
+      .catch(err => {
+        res.send("Error: " + err);
+      });
+});
+
+// Get posts
+router.get('/getData', (req, res) => {
+    User.find().exec((err, users) => {
+        if (err) {
             return res.status(400).json({
-                massage:"Delete unsuccesful",err
+                error: err
             });
-            return res.json({
-                massege:"Delete Succesfully",user
-                
-            });
-        
-
+        }
+        return res.status(200).json({
+            success: true,
+            existingPosts: users
+        });
     });
 });
 
-
- 
-
+// Delete post
+router.delete('/user/delete/:id', (req, res) => {
+    User.findByIdAndRemove(req.params.id).exec((err, user) => {
+        if (err) {
+            return res.status(400).json({
+                message: "Delete unsuccessful", err
+            });
+        }
+        return res.json({
+            message: "Delete successfully", user
+        });
+    });
+});
 
 module.exports = router;

@@ -3,6 +3,9 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const app = express();
+app.set('trust proxy', 1);
+const rateLimit = require('express-rate-limit');
+
 
 
 const PORT = process.env.PORT || 8070;
@@ -21,6 +24,12 @@ const postReturn = require('./routes/postReturn');
 const postStock = require('./routes/stock')
 const pay = require('./routes/payment')
 
+//prevent DoS attack
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // Limit each IP to 100 requests per windowMs
+    message: "Too many requests, please try again later."
+});
 
 
 //app middelware
@@ -30,6 +39,7 @@ app.use(express.json());
 app.use(express.static('upload'));
 app.use(express.static('rentUpload'));
 app.use(cors());
+app.use(limiter);
 
 
 
@@ -54,7 +64,7 @@ app.get("/", (req, res) => {
 })
 
 
-const DB_URL = ''
+const DB_URL = 'mongodb+srv://shabry:shabry@mydb.t4wv3xl.mongodb.net/onetel'
 mongoose.set('strictQuery', false);
 mongoose.set('strictQuery', true);
 
