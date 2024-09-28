@@ -26,5 +26,5 @@ const validator = require('validator');
            default: Date.now
         }
  });
- module.exports  = mongoose.model('admin',AdminSchema)
+ module.exports  = mongoose.model('admins',AdminSchema)
  

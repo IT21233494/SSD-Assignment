@@ -2,15 +2,30 @@ const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
-const cors = require('cors');
+const  cors = require('cors');
 const User = require('../models/postUsers');
-
-
+const Admin = require('../models/postAdmin');
 router.use(cors());
+
+
 process.env.SECRET_KEY = 'secret';
 
+// Token verification middleware
+const verifyToken = (req, res, next) => {
+  const token = req.headers['authorization'];
+  if (!token) {
+    return res.status(403).json({ error: 'Access denied, no token provided' });
+  }
 
-// Register route
+  try {
+    const decoded = jwt.verify(token, process.env.SECRET_KEY);
+    req.user = decoded; // Store user info from token in request
+    next();
+  } catch (err) {
+    return res.status(401).json({ error: 'Invalid token' });
+  }
+};
+
 router.post('/register', (req, res) => {
     const today = new Date();
   
@@ -21,22 +36,16 @@ router.post('/register', (req, res) => {
       password: req.body.password,
       created: today
     };
-
+  
     // Check if any required field is empty
     if (!userData.first_name || !userData.last_name || !userData.email || !userData.password) {
       return res.status(400).json({ error: 'Please fill in all required fields' });
     }
-    
-    // NoSQL injection prevention
-    if ( 
-      typeof userData.email !== 'string') {
-      return res.status(400).json({ error: 'Invalid input type' });
-  }
-
-    User.findOne({ email: userData.email })
+  
+    User.findOne({ email: req.body.email })
       .then(user => {
         if (!user) {
-          bcrypt.hash(userData.password, 10, (err, hash) => {
+          bcrypt.hash(req.body.password, 10, (err, hash) => {
             userData.password = hash;
             User.create(userData)
               .then(user => {
@@ -53,15 +62,13 @@ router.post('/register', (req, res) => {
       .catch(err => {
         res.status(500).json({ error: 'Internal server error' });
       });
-});
+  });
+  
 
-// Login route
+
+
+
 router.post('/login', (req, res) => {
-    // Input validation
-    if (typeof req.body.email !== 'string'){
-        return res.status(400).json({ error: 'Invalid input type' });
-    }
-
     User.findOne({ email: req.body.email })
       .then(user => {
         if (user) {
@@ -84,62 +91,93 @@ router.post('/login', (req, res) => {
       .catch(err => {
         res.status(500).json({ error: 'Server error' });
       });
-});
+  });
 
-// Profile route
-router.get('/profile', (req, res) => {
-    const token = req.headers['authorization'];
-    if (!token) {
-        return res.status(403).json({ error: 'No token provided' });
-    }
 
-    var decoded;
-    try {
-        decoded = jwt.verify(token, process.env.SECRET_KEY);
-    } catch (err) {
-        return res.status(500).json({ error: 'Failed to authenticate token' });
-    }
+  // router.post('/admin/login', (req, res) => {
+  //   Admin.findOne({ email: req.body.email })
+  //   .then(admin => {
+  //     if (admin) {
+  //       // Compare passwords
+  //       if (bcrypt.compareSync(req.body.password, admin.password)) {
+  //         const payload = {
+  //           _id: admin._id,
+  //           email: admin.email,
+  //           //role: 'admin',  // You can add other fields if needed
+  //         };
 
-    User.findOne({ _id: decoded._id })
-      .then(user => {
-        if (user) {
-            res.json(user);
-        } else {
-            res.send("User does not exist");
+  //         // Generate JWT token
+  //         let token = jwt.sign(payload, process.env.SECRET_KEY, { expiresIn: 1440 });
+  //         res.json({ token: token });  // Send token to client
+  //       } else {
+  //         res.status(401).json({ error: 'Invalid password' });
+  //       }
+  //     } else {
+  //       res.status(404).json({ error: 'Admin not found' });
+  //     }
+  //   })
+  //   .catch(err => {
+  //     res.status(500).json({ error: 'Server error' });
+  //   });
+  // });
+  
+
+router.get('/profile',verifyToken,(req,res)=>{
+    var decoded = jwt.verify(req.headers['authorization'],process.env.SECRET_KEY)
+
+    User.findOne({
+        _id:decoded._id
+    })
+      .then(user =>{
+        if(user){
+            res.json(user)
+        }else{
+            res.send("User Doesnot exist");
         }
       })
-      .catch(err => {
-        res.send("Error: " + err);
-      });
+      .catch(err=>{
+        res.send("ERRor"+err);
+      })
+
+
+})
+
+//get posts
+
+router.get('/getData',verifyToken,(req,res)=>{
+  User.find().exec((err,user)=>{
+      if(err){
+          return res.status(400).json({
+              error:err
+          });
+      }
+          return res.status(200).json({
+              success:true,
+              existingPosts:user
+          });
+      
+  });
 });
 
-// Get posts
-router.get('/getData', (req, res) => {
-    User.find().exec((err, users) => {
-        if (err) {
+
+//delete post
+router.delete('/user/delete/:id',verifyToken,(req,res)=>{
+    User.findByIdAndRemove(req.params.id).exec((err,user)=>{
+        if(err)
             return res.status(400).json({
-                error: err
+                massage:"Delete unsuccesful",err
             });
-        }
-        return res.status(200).json({
-            success: true,
-            existingPosts: users
-        });
+            return res.json({
+                massege:"Delete Succesfully",user
+                
+            });
+        
+
     });
 });
 
-// Delete post
-router.delete('/user/delete/:id', (req, res) => {
-    User.findByIdAndRemove(req.params.id).exec((err, user) => {
-        if (err) {
-            return res.status(400).json({
-                message: "Delete unsuccessful", err
-            });
-        }
-        return res.json({
-            message: "Delete successfully", user
-        });
-    });
-});
+
+
+
 
 module.exports = router;

@@ -1,5 +1,5 @@
 import axios from'axios';
- 
+ import api from './axiosConfig';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 export const register = async newUser => {
@@ -48,6 +48,7 @@ export const register = async newUser => {
       });
   
       localStorage.setItem('usertoken', res.data);
+      localStorage.setItem('token', res.data.token);
       return res.data;
     } catch (err) {
       console.log(err);
@@ -61,4 +62,29 @@ export const register = async newUser => {
       throw err;
     }
   };
-  
+
+
+// Admin Login Function
+export const AdminLogin = async (user) => {
+  try {
+    const res = await api.post('http://localhost:8070/admin/login', {
+      email: user.email,
+      password: user.password,
+    });
+
+    if (res.data.token) {
+      // Store token in localStorage
+      localStorage.setItem('token', res.data.token);
+      console.log('Token received:', res.data.token); // Log the token
+
+
+      return res.data; // Successfully logged in
+    } else {
+      console.error('No token in response');
+      return false;  // Token not received
+    }
+  } catch (error) {
+    console.error('Admin login error', error);
+    return false;
+  }
+};

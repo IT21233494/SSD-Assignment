@@ -55,6 +55,7 @@ import RentC from './components/Rent/RentC';
  
 import Chat from './components/Chatbot/chat';
 import AdminDashboard from "./components/Admin/dashboard";
+import ProtectedRoute from './ProtectedRoute';
  
 
 export default class App extends Component {
@@ -74,7 +75,11 @@ export default class App extends Component {
       
      
        
-        <Route exact path="/admin"  element={<Dashboard/>}></Route> 
+        <Route exact path="/admin"  element={
+                  <ProtectedRoute roleRequired="admin">
+                    <Dashboard />
+                  </ProtectedRoute>
+                }></Route>
         <Route exact path="/account"  element={<Adminacc/>}></Route> 
     
 
