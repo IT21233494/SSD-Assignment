@@ -2,6 +2,10 @@ const bodyParser = require('body-parser');
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const https = require('https');
+const fs = require('fs');
+const path = require('path');
+
 
 //fix accooprding to sonarqube
 const helmet = require('helmet');
@@ -82,7 +86,15 @@ mongoose.connect(DB_URL)
     })
     .catch((err) => console.log('DB connection error', err));
 
+const sslServer = https.createServer({
+    key: fs.readFileSync(path.join(__dirname, 'cert', 'key.pem')),
+    cert: fs.readFileSync(path.join(__dirname, 'cert', 'cert.pem'))
+}, app);
 
-app.listen(PORT, () => {
-    console.log(`App is running on ${PORT}`);
-})
+// app.listen(PORT, () => {
+//     console.log(`App is running on ${PORT}`);
+// })
+
+sslServer.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+});

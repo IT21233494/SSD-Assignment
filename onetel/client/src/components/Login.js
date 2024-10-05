@@ -1,101 +1,126 @@
-import React, { Component } from 'react'
-import {login} from './userFuntion';
+import React, { Component } from 'react';
+import { login } from './userFuntion';
 import { Link } from "react-router-dom";
 import { ToastContainer, toast } from 'react-toastify';
-import "./login.css"
- 
-export default class Login extends Component {
+import FacebookLogin from 'react-facebook-login';
+import './login.css';
 
-  constructor(props){
+export default class Login extends Component {
+  constructor(props) {
     super(props);
-    this.state =  {
-         email : '',
-         password : ''
-    }
+    this.state = {
+      email: '',
+      password: ''
+    };
     this.onChange = this.onChange.bind(this);
     this.onSubmit = this.onSubmit.bind(this);
+    this.responseFacebook = this.responseFacebook.bind(this);
   }
 
-  onChange(e){
-    this.setState({[e.target.name]:e.target.value})
+  onChange(e) {
+    this.setState({ [e.target.name]: e.target.value });
   }
-  onSubmit(e){
-    e.preventDefault()
 
-    const user ={
-        email:this.state.email,
-        password:this.state.password
-    }    
-    
-    if(this.state.email == "admin@gmail.com" && this.state.password == "1234"){
-         toast.success("Admin Login")
-          window.location="/admin";
-   }
-    else if(this.state.email == "run@email.com" && this.state.password == "1234"){ 
-      window.location="/delivery/person";
+  onSubmit(e) {
+    e.preventDefault();
+
+    const user = {
+      email: this.state.email,
+      password: this.state.password
+    };
+
+    if (this.state.email === "admin@gmail.com" && this.state.password === "1234") {
+      toast.success("Admin Login");
+      window.location = "/admin";
+    } else if (this.state.email === "run@email.com" && this.state.password === "1234") {
+      window.location = "/delivery/person";
+    } else {
+      login(user).then(res => {
+        if (res) {
+          // Save user data in local storage
+          localStorage.setItem('user', JSON.stringify(res));
+          window.location.href = "/profile";
+        } else {
+          window.alert("Error");
+        }
+      });
     }
-    else if(login(user).then(res=>{
-        if(res){
-           window.location.href="/profile";
-          
-         }}))
-         {
-      
- 
-         }
-    else{
-      window.alert("erro")
-    }
-
-       
-   
-  
-
-      
   }
-  
 
+  // Facebook login response handler
+  responseFacebook(response) {
+    console.log(response);
+    if (response.accessToken) {
+      // Save the user data from Facebook into local storage
+      const fbUser = {
+        name: response.name,
+        email: response.email,
+        picture: response.picture.data.url
+      };
 
+      localStorage.setItem('user', JSON.stringify(fbUser));  // Store Facebook user data
+      toast.success("Facebook login successful!");
+      window.location.href = "/profile";  // Navigate to profile
+    } else {
+      toast.error("Facebook login failed.");
+    }
+  }
 
   render() {
     return (
       <div className='container'>
-            <ToastContainer/>
+        <ToastContainer />
         <h2>
-            <div className='col-md-6 offset-md-3 border rounded p-4 mt-2 shadow loginds'>
-                <div className='cil-md-6 mt-5 mx-auto'>
-                    <form noValidate onSubmit={this.onSubmit}>
-                        <h6 className='h6 mb-3 font-weight-normal text-center'>
-                            <p className='h2 mb-5'   align="left">Login</p>
-                            <div className='form-group'>
-                                <label htmlFor='email'>Email Address</label><br/><br/>
-                                <input type='email' 
-                                       className='form-control form-control-sm'
-                                       name='email'
-                                       placeholder='Enter Email'
-                                       value={this.state.email}
-                                       onChange={this.onChange}
-                                       />
-                            </div><br/>
-                            <div className='form-group'>
-                            <label htmlFor='password'>Password</label><br/><br/>
-                                <input type='password' 
-                                       className='form-control form-control-sm'
-                                       name='password'
-                                       placeholder='Enter Password'
-                                       value={this.state.password}
-                                       onChange={this.onChange}
-                                       />
-                             </div><br/><br/>
-                             <button className='btn logbtn'>Sign in</button>
-                               <br/><br/><br/>
-                               <Link className="link" to="/register">Haven't an account?</Link>
-                        </h6>
-                    </form>
-                </div>
+          <div className='col-md-6 offset-md-3 border rounded p-4 mt-2 shadow loginds'>
+            <div className='cil-md-6 mt-5 mx-auto'>
+              <form noValidate onSubmit={this.onSubmit}>
+                <h6 className='h6 mb-3 font-weight-normal text-center'>
+                  <p className='h2 mb-5' align="left">Login</p>
+
+                  <div className='form-group'>
+                    <label htmlFor='email'>Email Address</label><br /><br />
+                    <input
+                      type='email'
+                      className='form-control form-control-sm'
+                      name='email'
+                      placeholder='Enter Email'
+                      value={this.state.email}
+                      onChange={this.onChange}
+                    />
+                  </div><br />
+                  <div className='form-group'>
+                    <label htmlFor='password'>Password</label><br /><br />
+                    <input
+                      type='password'
+                      className='form-control form-control-sm'
+                      name='password'
+                      placeholder='Enter Password'
+                      value={this.state.password}
+                      onChange={this.onChange}
+                    />
+                  </div><br /><br />
+                  <button className='btn logbtn'>Sign in</button>
+                  <br /><br />
+
+                  {/* Facebook Login Button */}
+                  <FacebookLogin
+                    appId="1193791145246680" 
+                    autoLoad={false}
+                    fields="name,email,picture"
+                    callback={this.responseFacebook}
+                    icon="fa-facebook"
+                    textButton="Login with Facebook"
+                    cssClass="btn btn-primary btn-block mt-3"
+                  />
+
+                  <br /><br />
+                  <Link className="link" to="/register">Haven't an account?</Link>
+                </h6>
+              </form>
             </div>
+          </div>
         </h2>
       </div>
-    )
+    );
   }
 }

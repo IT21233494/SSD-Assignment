@@ -100,7 +100,7 @@ const upload = multer({
     limits: {
         fileSize: 8000000 // 8MB limit
     }
-}).single('file');
+}).single('CusImg');
 
 //get a specific post
 router.get('/Emp/:id', async (req, res) => {
